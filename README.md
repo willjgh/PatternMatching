@@ -19,7 +19,7 @@ With the exception of the Limit type, Nodes keep running until a full pass over 
 
 An example of program using Nodes is 'Repeating-Voroni':
 
-(add example of repeating-voroni)
+![repeating-voroni-gif](Videos/repeating-voroni-video.gif)
 
 Red and white seeds are spawned on a black grid, each of which exapands to fill the space until all squares fade to black and the process repeats. The program is a nesting of Sequential Nodes:
 
