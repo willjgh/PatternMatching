@@ -304,6 +304,13 @@ class Node:
                     if flag:
                         overall_flag = True
 
+        # Random node: execute items at random
+        elif self.ntype == "Random":
+
+            # shuffle items
+            
+
+
         # return updated state and flag for execution (of any item)
         return state, overall_flag
 
