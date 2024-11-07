@@ -307,9 +307,27 @@ class Node:
         # Random node: execute items at random
         elif self.ntype == "Random":
 
-            # shuffle items
-            
+            # loop while at least one content executed
+            exec_flag = True
+            while exec_flag:
 
+                # reset flag
+                exec_flag = False
+
+                # shuffle contents
+                rng.shuffle(self.contents)
+
+                # loop over shuffled contents until one executes
+                for item in self.contents:
+
+                    # run item: recieve updated state and flag for execution
+                    state, flag = item.run(state)
+
+                    # if item executed: toggle flag, reset loop over node contents
+                    if flag:
+                        overall_flag = True
+                        exec_flag = True
+                        break
 
         # return updated state and flag for execution (of any item)
         return state, overall_flag
