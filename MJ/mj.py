@@ -291,8 +291,18 @@ class Node:
         # Limit node: run each item in contents a limited number of times
         elif self.ntype == "Limit":
 
+            # tuple given as limit: sample from uniform distribution
+            if isinstance(self.limit, tuple):
+
+                limit = rng.integers(*self.limit)
+
+            # integer given: proceed as usual
+            else:
+
+                limit = self.limit
+
             # limited number of runs
-            for i in range(self.limit):
+            for i in range(limit):
 
                 # loop over contents
                 for item in self.contents:
