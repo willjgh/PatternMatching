@@ -30,7 +30,7 @@ colours = {
 
 class Game:
 
-    def __init__(self, window_width=700, window_height=700, canvas_width=4, canvas_height=4):
+    def __init__(self, window_width=700, window_height=700, canvas_width=4, canvas_height=4, ticks=0):
 
         # initialize pygame
         pygame.init()
@@ -48,6 +48,7 @@ class Game:
         # pygame settings
         pygame.display.set_caption("MarkovJunior")
         self.clock = pygame.time.Clock()
+        self.ticks = ticks
         self.font = pygame.font.SysFont("Arial", 18, bold=True)
 
         # running flag
@@ -112,6 +113,9 @@ class Game:
     def draw(self, state, indices):
         '''Draw indices that were changed by rules as new colours'''
 
+        # limit speed
+        self.clock.tick(self.ticks)
+
         # loop over changed indices
         for idx in indices:
 
@@ -136,7 +140,7 @@ class Game:
 
 class MarkovJunior:
 
-    def __init__(self, i, j, window_width=700, window_height=700):
+    def __init__(self, i, j, window_width=700, window_height=700, ticks=0):
 
         # grid size
         self.i = i
@@ -146,7 +150,7 @@ class MarkovJunior:
         self.state = {
             'grid': np.empty((self.i, self.j), dtype=str),
             'dict': {colour: [] for colour in colours.keys()},
-            'game': Game(window_width=window_width, window_height=window_height, canvas_width=j, canvas_height=i)
+            'game': Game(window_width=window_width, window_height=window_height, canvas_width=j, canvas_height=i, ticks=ticks)
         }
 
         # program list
