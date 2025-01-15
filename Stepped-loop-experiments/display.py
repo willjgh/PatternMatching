@@ -44,6 +44,9 @@ class Display():
 
         # running flag
         self.running = True
+
+        # action
+        self.action = False
     
 
     def framerate_counter(self):
@@ -72,6 +75,9 @@ class Display():
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
 
+                if event.key == pygame.K_RIGHT:
+                    self.action = True
+
         # quit
         if not self.running:
             pygame.quit()
@@ -99,7 +105,7 @@ class Display():
         pygame.display.flip()
 
         # check for quit
-        self.event_handler()
+        #self.event_handler()
 
     def draw(self, state, indices):
         '''Draw indices that were changed by rules as new colours'''
@@ -126,4 +132,4 @@ class Display():
         pygame.display.flip()
 
         # check for quit
-        self.event_handler()
+        #self.event_handler()
