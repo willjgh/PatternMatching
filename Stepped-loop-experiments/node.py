@@ -1,5 +1,33 @@
 import numpy as np
 
+class Sequential(Node):
+    def __init__(self, *args):
+
+        # contents: collection of rules or other nodes
+        self.contents = list(args)
+
+class Markov(Node):
+    def __init__(self, *args):
+
+        # contents: collection of rules or other nodes
+        self.contents = list(args)
+
+class Limit(Node):
+    def __init__(self, *args, limit=1):
+        
+        # contents: collection of rules or other nodes
+        self.contents = list(args)
+
+        # limit: limit on loops over contents
+        self.limit = limit
+
+class Random(Node):
+    def __init__(self, *args):
+
+        # contents: collection of rules or other nodes
+        self.contents = list(args)
+
+
 class Node():
     def __init__(self, ntype, contents, limit=None):
 
