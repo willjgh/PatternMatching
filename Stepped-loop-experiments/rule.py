@@ -273,11 +273,11 @@ class Rule():
             changed_indices = self.replace(state, matches)
 
             # draw new colours for the changed indices
-            state['game'].draw(state, changed_indices)
+            #state['game'].draw(state, changed_indices)
 
-            # return state and flag changes
-            return state, True
+            # return state, changd indices and flag
+            return state, changed_indices, True
 
-        # no changes: flag
+        # no changes: return unchanged state, empty index list and flag
         else:
-            return state, False
+            return state, [], False
