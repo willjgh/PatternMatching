@@ -1,32 +1,5 @@
 import numpy as np
 
-class Sequential(Node):
-    def __init__(self, *args):
-
-        # contents: collection of rules or other nodes
-        self.contents = list(args)
-
-class Markov(Node):
-    def __init__(self, *args):
-
-        # contents: collection of rules or other nodes
-        self.contents = list(args)
-
-class Limit(Node):
-    def __init__(self, *args, limit=1):
-        
-        # contents: collection of rules or other nodes
-        self.contents = list(args)
-
-        # limit: limit on loops over contents
-        self.limit = limit
-
-class Random(Node):
-    def __init__(self, *args):
-
-        # contents: collection of rules or other nodes
-        self.contents = list(args)
-
 
 class Node():
     def __init__(self, ntype, contents, limit=None):
@@ -49,8 +22,30 @@ class Node():
         # flag for exhaustion
         self.flag_exhausted = False
 
+
+class Sequential(Node):
+    def __init__(self, *args):
+        super().__init__("Sequential", list(args))
+
+
+class Markov(Node):
+    def __init__(self, *args):
+        super().__init__("Markov", list(args))
+
+
+class Limit(Node):
+    def __init__(self, *args, limit=1):
+        super().__init__("Limit", list(args), limit=limit)
+
+
+class Random(Node):
+    def __init__(self, *args):
+        super().__init__("Random", list(args))
+
+
+'''
     def run(self, state):
-        '''Loop over contents according to type and call them on grid'''
+        # Loop over contents according to type and call them on grid
 
         # random generator
         rng = np.random.default_rng()
@@ -154,3 +149,4 @@ class Node():
 
         # return updated state and flag for execution (of any item)
         return state, overall_flag
+'''
