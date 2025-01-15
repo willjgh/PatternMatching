@@ -58,7 +58,6 @@ class GameOfLife(MarkovJunior):
             Node('Random', rules)
         ]
 
-#@profile
 def main():
     gameoflife = GameOfLife(50, 50, window_width=700, window_height=700, ticks=2)
     gameoflife.program_loop()
