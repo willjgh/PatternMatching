@@ -3,7 +3,6 @@ from profilehooks import profile
 
 from node import Node
 from rule import Rule
-from display import Display
 
 # dictionary for translating colour alphabet to RGB
 colours = {
@@ -43,7 +42,7 @@ class MarkovJunior:
         self.program = []
 
         # index list
-        self.index_list = []
+        self.index_list = [0]
 
     def program_setup(self):
         '''
@@ -101,7 +100,13 @@ class MarkovJunior:
     def next(self):
         '''Step iteration of program.'''
 
-        # move through index list to identify parent item and current item
+        #print(f"Index list: {self.index_list}")
+        #print(f"Program: {self.program}")
+
+        # default to no changed indices
+        changed_indices = None
+
+        # iterate over index list to identify parent and child / current item
         depth = len(self.index_list)
 
         parent_item = None
@@ -110,74 +115,97 @@ class MarkovJunior:
         for i in range(1, depth):
 
             parent_item = current_item
-            current_item = parent_item[self.index_list[i]]
+            current_item = parent_item.contents[self.index_list[i]] # replace with indexing via __getitem__
 
-        # if current item is a Rule
-        if type(current_item) == Rule:
+        # current item Node
+        if isinstance(current_item, Node):
 
-            # run current item (Rule): return updated state and execution flag
-            self.state, flag = current_item.run(self.state)
+            # exhausted Node
+            if current_item.flag_exhausted:
 
-            # update flags of parent item (Node): at least one change in current loop over contents, and overall
-            if flag: parent_item.flag_current_loop = True
-            if flag: parent_item.flag_overall_loop = True
+                # if parent exists: update flags for changes in current loop / overall
+                if parent_item:
+                    parent_item.flag_current_loop = current_item.flag_overall_loop
+                    parent_item.flag_overall_loop = current_item.flag_overall_loop
 
-        # if current item is an exhausted Node
-        elif type(current_item) == Node and current_item.flag_exhausted == True:
+                # reset Node flags
+                current_item.flag_exhausted = False
+                current_item.flag_current_loop = False
+                current_item.flag_overall_loop = False
 
-            # reset exhaustion
-            current_item.flag_exhausted = False
+            # non-exhausted Node
+            else:
+                
+                # update index to point to contents
+                self.index_list.append(0)
 
-            # set flags of parent using current flags
-            parent_item.flag_current_loop = self.flag_overall_loop
-            parent_item.flag_overall_loop = self.flag_overall_loop
+                # Return no changes
+                return None, True
 
-        # if current item is a non-exhausted Node
-        elif type(current_item) == Node and current_item.flag_exhausted == False:
+        # current item Rule
+        else:
 
-            # update index to level of node contents (deeper level)
-            self.index_list.append(0)
+            # run Rule
+            self.state, changed_indices, flag = current_item.run(self.state)
 
-            # exit
-            return None
-        
-        # for executed rules / exhausted nodes update index according to parent node type
+            # if parent exists: update flags for changes in current loop / overall
+            if parent_item:
+                if flag: parent_item.flag_current_loop = True
+                if flag: parent_item.flag_overall_loop = True
 
-        # size of parent contents
-        size = len(parent_item.contents)
+        # for remaining Rule and exhausted Nodes: update index
 
-        # current index (deepest level)
-        idx = self.index_list[-1]
+        # no parent: in program level, increment or terminate
+        if not parent_item:
 
-        # update index
-        if parent_item.ntype == 'Sequential':
+            # get program size
+            size = len(self.program)
 
-            # at end of parent contents
-            if idx + 1 == size:
-
-                # if at least one change made in current loop
-                if parent_item.flag_current_loop:
-
-                    # update index to start of parent contents
-                    self.index_list[-1] = 0
-
-                # no changes made in current loop
-                else:
-
-                    # update index to higher level
-                    self.index_list.pop()
-
-            # otherwise: move to next parent content
+            # at end: terminate
+            if self.index_list[-1] + 1 == size:
+                return changed_indices, False
+            
+            # otherwise: increment
             else:
                 self.index_list[-1] += 1
 
-        # return indices of changes
-        return None
-                
+        # sequential Node parent
+        elif parent_item.ntype == "Sequential":
 
-        
+            # get contents size
+            size = len(parent_item.contents)
 
+            # at end
+            if self.index_list[-1] + 1 == size:
 
+                # changes in current loop
+                if parent_item.flag_current_loop:
+
+                    # reset index to start
+                    self.index_list[-1] = 0
+
+                    # reset loop flag
+                    parent_item.flag_current_loop = False
+
+                # no changes in current loop
+                else:
+
+                    # point index to parent
+                    self.index_list.pop()
+
+                    # exhuast (now pointed to) parent Node
+                    parent_item.flag_exhausted = True
+
+            # otherwise: increment
+            else:
+                self.index_list[-1] += 1
+
+        # markov Node parent
+        elif parent_item.ntype == "Markov":
+            pass
+
+        # return changed indices, program status
+        return changed_indices, True
 
     def program_loop(self):
         '''Run the program'''
