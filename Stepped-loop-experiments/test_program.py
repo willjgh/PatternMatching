@@ -1,5 +1,5 @@
 from mj import MarkovJunior
-from node import Node, Sequential, Markov
+from node import Node, Sequential, Markov, Limit
 from rule import Rule
 from display import Display
 
@@ -20,7 +20,7 @@ class Fill(MarkovJunior):
         # densities
 
         # program
-        self.program = [
+        a = [
             Rule("B", "R", self.state),
             Sequential(
                 Markov(Rule("RBB", "WWR", self.state)),
@@ -29,11 +29,34 @@ class Fill(MarkovJunior):
                 Rule("RWO", "BBR", self.state)
             )
         ]
+        self.program = [
+            Limit(
+                Rule("B", "R", self.state),
+                Rule("B", "Y", self.state),
+                Rule("B", "U", self.state),
+                Rule("B", "G", self.state),
+                Rule("B", "O", self.state)
+            ),
+            Sequential(
+                Rule("RB", "RR", self.state),
+                Rule("YB", "YY", self.state),
+                Rule("UB", "UU", self.state),
+                Rule("GB", "GG", self.state),
+                Rule("OB", "OO", self.state)
+            ),
+            Sequential(
+                Rule("RY", "RR", self.state),
+                Rule("YU", "YY", self.state),
+                Rule("UG", "UU", self.state),
+                Rule("GO", "GG", self.state),
+                Rule("OR", "OO", self.state)
+            )
+        ]
 
 def main():
 
     # size
-    i, j= 50, 50
+    i, j= 20, 20
     winh, winw = 1000, 1000
 
     # initialize program
