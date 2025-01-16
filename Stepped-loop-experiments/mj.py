@@ -128,10 +128,11 @@ class MarkovJunior:
                     parent_item.flag_current_loop = current_item.flag_overall_loop
                     parent_item.flag_overall_loop = current_item.flag_overall_loop
 
-                # reset Node flags
-                current_item.flag_exhausted = False
-                current_item.flag_current_loop = False
-                current_item.flag_overall_loop = False
+                # reset Node
+                current_item.reset()
+                #current_item.flag_exhausted = False
+                #current_item.flag_current_loop = False
+                #current_item.flag_overall_loop = False
 
             # non-exhausted Node
             else:
@@ -232,7 +233,37 @@ class MarkovJunior:
                     self.index_list[-1] += 1
 
         elif parent_item.ntype == "Limit":
-            pass
+            
+            # get contents size
+            size = len(parent_item.contents)
+
+            # at end
+            if self.index_list[-1] + 1 == size:
+
+                # no changes in current loop OR reach limit
+                if (not parent_item.flag_current_loop) or (parent_item.current_count + 1 == parent_item.limit):
+
+                    # point index to parent
+                    self.index_list.pop()
+
+                    # exhaust (now pointed to) parent Node
+                    parent_item.flag_exhausted = True
+
+                # below limit
+                else:
+
+                    # increment count
+                    parent_item.current_count += 1
+
+                    # reset index to start
+                    self.index_list[-1] = 0
+
+                    # reset loop flag
+                    parent_item.flag_current_loop = False
+
+            # otherwise: increment
+            else:
+                self.index_list[-1] += 1
 
         elif parent_item.ntype == "Random":
             pass
