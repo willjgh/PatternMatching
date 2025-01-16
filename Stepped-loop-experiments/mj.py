@@ -115,7 +115,7 @@ class MarkovJunior:
         for i in range(1, depth):
 
             parent_item = current_item
-            current_item = parent_item.contents[self.index_list[i]] # replace with indexing via __getitem__
+            current_item = parent_item[self.index_list[i]]
 
         # current item Node
         if isinstance(current_item, Node):
@@ -202,6 +202,39 @@ class MarkovJunior:
 
         # markov Node parent
         elif parent_item.ntype == "Markov":
+            
+            # changes by current item
+            if parent_item.flag_current_loop:
+
+                # reset index to start
+                self.index_list[-1] = 0
+
+                # reset loop flag
+                parent_item.flag_current_loop = False
+
+            # no changes by current item
+            else:
+
+                # get contents size
+                size = len(parent_item.contents)
+
+                # at end
+                if self.index_list[-1] + 1 == size:
+
+                    # point index to parent
+                    self.index_list.pop()
+
+                    # exhuast (now pointed to) parent Node
+                    parent_item.flag_exhausted = True
+
+                # otherwise: increment
+                else:
+                    self.index_list[-1] += 1
+
+        elif parent_item.ntype == "Limit":
+            pass
+
+        elif parent_item.ntype == "Random":
             pass
 
         # return changed indices, program status
