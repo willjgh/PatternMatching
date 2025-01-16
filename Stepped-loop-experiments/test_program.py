@@ -1,5 +1,5 @@
 from mj import MarkovJunior
-from node import Node
+from node import Node, Sequential, Markov
 from rule import Rule
 from display import Display
 
@@ -21,21 +21,20 @@ class Fill(MarkovJunior):
 
         # program
         self.program = [
-            Node("Sequential", [
-                Node("Sequential", [
-                    Rule("B", "W", self.state)
-                ]),
-                Node("Sequential", [
-                    Rule("W", "B", self.state)
-                ])
-            ])
+            Rule("B", "R", self.state),
+            Sequential(
+                Markov(Rule("RBB", "WWR", self.state)),
+                Rule("RBW", "RBO", self.state),
+                Markov(Rule("RWW", "BBR", self.state)),
+                Rule("RWO", "BBR", self.state)
+            )
         ]
 
 def main():
 
     # size
     i, j= 50, 50
-    winh, winw = 500, 500
+    winh, winw = 1000, 1000
 
     # initialize program
     fill = Fill(i, j)
@@ -56,7 +55,7 @@ def main():
         display.event_handler()
 
         # step program
-        if program_status:# and display.action:
+        if program_status: #and display.action:
             changed_indices, program_status = fill.next()
             display.action = False
 
