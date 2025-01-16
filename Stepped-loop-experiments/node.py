@@ -22,6 +22,14 @@ class Node():
         # flag for exhaustion
         self.flag_exhausted = False
 
+    def __getitem__(self, key):
+        '''Allow indexing of contents.'''
+        return self.contents[key]
+    
+    def __setitem__(self, key, val):
+        '''Allow setting contents via indexing.'''
+        self.contents[key] = val
+
 
 class Sequential(Node):
     def __init__(self, *args):
