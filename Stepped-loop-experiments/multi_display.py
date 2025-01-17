@@ -21,22 +21,24 @@ colours = {
 }
 
 class MultiDisplay():
-    def __init__(self, window_width=700, window_height=700, canvas_width=4, canvas_height=4, ticks=0, multi_width=2, multi_height=2):
+    def __init__(self, window_height=700, window_width=700, canvas_height=4, canvas_width=4, multi_height=2, multi_width=2, ticks=0):
 
         # initialize pygame
         pygame.init()
 
         # window: high resolution, display on screen
-        self.window_width = window_width
         self.window_height = window_height
-        self.window = pygame.display.set_mode((self.window_width, self.window_height))
-
-        # setup grid of multiple canvases
+        self.window_width = window_width
+        self.window = pygame.display.set_mode((window_width, window_height))
 
         # canvas: low resolution, draw on then draw to window
-        self.canvas_width = canvas_width
         self.canvas_height = canvas_height
-        self.canvas = pygame.Surface((self.canvas_width, self.canvas_height))
+        self.canvas_width = canvas_width
+
+        # grid of multiple canvases
+        self.multi_height = multi_height
+        self.multi_width = multi_width
+        self.canvas_list = [[pygame.Surface((canvas_width, canvas_height)) for j in range(multi_width)] for i in range(multi_height)]
 
         # pygame settings
         pygame.display.set_caption("MarkovJunior")
@@ -77,61 +79,95 @@ class MultiDisplay():
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
 
-                if event.key == pygame.K_RIGHT:
-                    self.action = True
-
         # quit
         if not self.running:
             pygame.quit()
 
-    def draw_setup(self, state):
-        '''Draw the full initial grid'''
+    def draw_setup(self, program_list):
+        '''Draw initial grid to each canvas '''
 
-        # loop over each letter
-        for letter, indices in state['dict'].items():
+        # loop over each canvas
+        for i in range(self.multi_height):
+            for j in range(self.multi_width):
 
-            # get colour
-            colour = colours[letter]
+                # get associated state
+                state = program_list[i][j].state
 
-            # draw each pixel
-            for idx in indices:
-                pygame.gfxdraw.pixel(self.canvas, idx[1], idx[0], colour)
+                # loop over each letter
+                for letter, indices in state['dict'].items():
+
+                    # get colour
+                    colour = colours[letter]
+
+                    # draw each pixel
+                    for idx in indices:
+                        pygame.gfxdraw.pixel(self.canvas_list[i][j], idx[1], idx[0], colour)
+                
+                # blit canvas to window
+                self.window.blit(
+                    pygame.transform.scale(
+                        self.canvas_list[i][j],
+                        (
+                            self.window_width // self.multi_width - 1,
+                            self.window_height // self.multi_height - 1
+                        )
+                    ),
+                    (
+                        j * (self.window_width // self.multi_width),
+                        i * (self.window_height // self.multi_height)
+                    )
+                )
         
-        # blit canvas to window
-        self.window.blit(pygame.transform.scale(self.canvas, self.window.get_rect().size), (0, 0))
-        
-        # add framerate
-        #self.framerate_counter()
-
         # update display
         pygame.display.flip()
 
-        # check for quit
-        #self.event_handler()
-
-    def draw(self, state, indices):
-        '''Draw indices that were changed by rules as new colours'''
+    def draw(self, program_list, indices_list):
+        '''Draw changes indices to each canvas'''
 
         # limit speed
         self.clock.tick(self.ticks)
 
-        # loop over changed indices
-        for idx in indices:
+        # loop over each canvas
+        for i in range(self.multi_height):
+            for j in range(self.multi_width):
 
-            # get colour
-            colour = colours[state['grid'][*idx]]
+                # if program finished: skip
+                if not program_list[i][j].running:
+                    continue
+                
+                # get associated state
+                state = program_list[i][j].state
 
-            # draw
-            pygame.gfxdraw.pixel(self.canvas, idx[1], idx[0], colour)
+                # get associated indices
+                indices = indices_list[i][j]
 
-        # blit canvas to window
-        self.window.blit(pygame.transform.scale(self.canvas, self.window.get_rect().size), (0, 0))
-        
-        # add framerate
-        #self.framerate_counter()
+                # if empty: skip
+                if not indices:
+                    continue
+
+                # loop over changed indices
+                for idx in indices:
+
+                    # get colour
+                    colour = colours[state['grid'][*idx]]
+
+                    # draw
+                    pygame.gfxdraw.pixel(self.canvas_list[i][j], idx[1], idx[0], colour)
+
+                # blit canvas to window
+                self.window.blit(
+                    pygame.transform.scale(
+                        self.canvas_list[i][j],
+                        (
+                            self.window_width // self.multi_width - 1,
+                            self.window_height // self.multi_height - 1
+                        )
+                    ),
+                    (
+                        j * (self.window_width // self.multi_width),
+                        i * (self.window_height // self.multi_height)
+                    )
+                )
 
         # update display
         pygame.display.flip()
-
-        # check for quit
-        #self.event_handler()
