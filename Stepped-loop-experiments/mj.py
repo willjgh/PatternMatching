@@ -42,6 +42,9 @@ class MarkovJunior:
         # define state: set with initial grid and dict
         self.setup(initial_grid, initial_dict)
 
+        # running status
+        self.running = True
+
     def setup(self, initial_grid, initial_dict):
         '''
         Setup initial state from input grid and/or dict
@@ -115,7 +118,7 @@ class MarkovJunior:
                 self.index_list.append(0)
 
                 # Return no changes
-                return None, True
+                return None
 
         # current item Rule
         else:
@@ -138,7 +141,12 @@ class MarkovJunior:
 
             # at end: terminate
             if self.index_list[-1] + 1 == size:
-                return changed_indices, False
+
+                # set status
+                self.running = False
+
+                # return changes
+                return changed_indices
             
             # otherwise: increment
             else:
@@ -272,5 +280,5 @@ class MarkovJunior:
                 else:
                     self.index_list[-1] += 1
 
-        # return changed indices, program status
-        return changed_indices, True
+        # return changed indices
+        return changed_indices
