@@ -1,5 +1,9 @@
 import numpy as np
 
+# create generator
+rng = np.random.default_rng()
+
+
 class Node():
     def __init__(self, ntype, contents):
 
@@ -62,113 +66,9 @@ class Limit(Node):
 
 class Random(Node):
     def __init__(self, *args):
+
+        # initial shuffle of contents
+        rng.shuffle(list(args))
+
+        # constuct Node
         super().__init__("Random", list(args))
-
-
-'''
-    def run(self, state):
-        # Loop over contents according to type and call them on grid
-
-        # random generator
-        rng = np.random.default_rng()
-
-        # overall flag for any item's execution
-        overall_flag = False
-
-        # Markov node: loop over contents and run until one executes, then repeat from beginning
-        if self.ntype == "Markov":
-
-            # loop while at least one content executed (end node call otherwise)
-            exec_flag = True
-            while exec_flag:
-
-                # reset flag
-                exec_flag = False
-
-                # loop over contents
-                for item in self.contents:
-
-                    # run item: recieve updated state and flag for execution
-                    state, flag = item.run(state)
-
-                    # if item executed: toggle flags, reset loop over node content
-                    if flag:
-                        overall_flag = True
-                        exec_flag = True
-                        break
-
-        # Sequential node: loop over contents regardless of execution
-        elif self.ntype == "Sequential":
-
-            # loop while at least one content executed (end node call otherwise)
-            exec_flag = True
-            while exec_flag:
-
-                # reset flag
-                exec_flag = False
-
-                # loop over contents
-                for item in self.contents:
-
-                    # run item: recieve updated state and flag for execution
-                    state, flag = item.run(state)
-
-                    # if item executed: toggle flags
-                    if flag:
-                        overall_flag = True
-                        exec_flag = True
-
-        # Limit node: run each item in contents a limited number of times
-        elif self.ntype == "Limit":
-
-            # tuple given as limit: sample from uniform distribution
-            if isinstance(self.limit, tuple):
-
-                limit = rng.integers(*self.limit)
-
-            # integer given: proceed as usual
-            else:
-
-                limit = self.limit
-
-            # limited number of runs
-            for i in range(limit):
-
-                # loop over contents
-                for item in self.contents:
-
-                    # run item: recieve updated state and flag for executioon
-                    state, flag = item.run(state)
-
-                    # if item executed: toggle flag
-                    if flag:
-                        overall_flag = True
-
-        # Random node: execute items at random
-        elif self.ntype == "Random":
-
-            # loop while at least one content executed
-            exec_flag = True
-            while exec_flag:
-
-                # reset flag
-                exec_flag = False
-
-                # shuffle contents
-                rng.shuffle(self.contents)
-
-                # loop over shuffled contents until one executes
-                for item in self.contents:
-
-                    # run item: recieve updated state and flag for execution
-                    state, flag = item.run(state)
-
-                    # if item executed: toggle flag, reset loop over node contents
-                    if flag:
-                        overall_flag = True
-                        exec_flag = True
-                        break
-
-        # return updated state and flag for execution (of any item)
-        return state, overall_flag
-'''
