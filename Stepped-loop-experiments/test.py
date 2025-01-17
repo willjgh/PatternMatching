@@ -1,3 +1,14 @@
+from node import Node
+
+nd = Node("sequential", [])
+
+print(isinstance(nd, Node))
+print(type(nd) == Node)
+
+index_list = [0]
+print(index_list[0])
+
+'''
 state = [1, [2, 3, [4, 5]], 6]
 
 index_list = [1, 2, 0]
@@ -14,3 +25,4 @@ for i in range(1, depth):
 
 print(parent_item)
 print(current_item)
+'''

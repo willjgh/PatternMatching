@@ -73,7 +73,6 @@ def main():
     display.draw_setup(mj.state)
 
     # running info
-    program_status = True
     changed_indices = []
 
     # loop
@@ -83,13 +82,13 @@ def main():
         display.event_handler()
 
         # only step if program still running
-        if program_status:
+        if mj.running:
 
             # automatic
             if display.automatic:
 
                 # step
-                changed_indices, program_status = mj.next()
+                changed_indices = mj.next()
             
             # manual
             else:
@@ -98,7 +97,7 @@ def main():
                 if display.action:
                 
                     # step
-                    changed_indices, program_status = mj.next()
+                    changed_indices = mj.next()
 
                     # reset action
                     display.action = False
