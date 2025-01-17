@@ -1,8 +1,5 @@
 import numpy as np
-from profilehooks import profile
-
 from node import Node
-from rule import Rule
 
 # dictionary for translating colour alphabet to RGB
 colours = {
@@ -24,84 +21,64 @@ colours = {
     "F": (255, 204, 153)
 }
 
+# create generator
+rng = np.random.default_rng()
+
+
 class MarkovJunior:
 
-    def __init__(self, i, j, window_width=700, window_height=700, ticks=0):
+    def __init__(self, grid_height, grid_width, program, initial_grid=None, initial_dict=None):
 
         # grid size
-        self.i = i
-        self.j = j
+        self.i = grid_height
+        self.j = grid_width
 
-        # define state: grid, dict, game
+        # program list
+        self.program = program
+
+        # index list
+        self.index_list = [0]
+
+        # define state: set with initial grid and dict
+        self.setup(initial_grid, initial_dict)
+
+    def setup(self, initial_grid, initial_dict):
+        '''
+        Setup initial state from input grid and/or dict
+        '''
+
+        # state
         self.state = {
             'grid': np.empty((self.i, self.j), dtype=str),
             'dict': {colour: [] for colour in colours.keys()}
         }
 
-        # program list
-        self.program = []
+        # both provided: set
+        if initial_grid and initial_dict:
+            self.state['grid'] = initial_grid
+            for colour, index_list in initial_dict.items():
+                self.state['dict'][colour] = index_list
 
-        # index list
-        self.index_list = [0]
+        # only grid provided: populate dict
+        elif initial_grid:
+            self.state['grid'] = initial_grid
+            for i in range(self.i):
+                for j in range(self.j):
+                    self.state['dict'][initial_grid[i, j]].append((i, j))
 
-    def program_setup(self):
-        '''
-        Define program: nodes and rules, and setup grid
+        # only dict provided: populate grid, and fill dict
+        elif initial_dict:
+            for colour, index_list in initial_dict.items():
+                self.state['dict'][colour] = index_list
+                for index in index_list:
+                    self.state['grid'][index[0], index[1]] = colour
 
-        MarkovJunior class provides an example of a program setup (below)
-        '''
-
-        # define state
-        for i in range(self.i):
-            for j in range(self.j):
-                self.state['grid'][i, j] = 'B'
-                self.state['dict']['B'].append((i, j))
-
-        # define densities
-        #def density_upper_left(state):
-        #    return np.array([[-np.log(i * j + 1) for j in range(self.j)] for i in range(self.i)])
-
-        # define program: nodes and their rules
-        self.program = [
-            Node(
-                "Markov", [
-                    Node(
-                        "Sequential", [
-                            Node(
-                                "Limit", [
-                                    Rule("B", "W", self.state)
-                                ],
-                                limit = 1
-                            ),
-                            Node(
-                                "Limit", [
-                                    Rule("B", "R", self.state)
-                                ],
-                                limit = 1
-                            ),
-                            Node(
-                                "Sequential", [
-                                    Rule("WB", "WW", self.state, rtype="one"),
-                                    Rule("RB", "RR", self.state, rtype="one")
-                                ]
-                            )
-                        ]
-                    ),
-                    Node(
-                        "Sequential", [
-                            Rule("W", "B", self.state, rtype="one"),
-                            Rule("R", "B", self.state, rtype="one")
-                        ]
-                    )
-                ]
-            )
-        ]
+        # none provided
+        else:
+            raise NotImplementedError
 
     def next(self):
         '''Step iteration of program.'''
-
-        #print(f"Index list: {self.index_list}")
-        #print(f"Program: {self.program}")
 
         # default to no changed indices
         changed_indices = None
@@ -130,9 +107,6 @@ class MarkovJunior:
 
                 # reset Node
                 current_item.reset()
-                #current_item.flag_exhausted = False
-                #current_item.flag_current_loop = False
-                #current_item.flag_overall_loop = False
 
             # non-exhausted Node
             else:
@@ -266,27 +240,37 @@ class MarkovJunior:
                 self.index_list[-1] += 1
 
         elif parent_item.ntype == "Random":
-            pass
+            
+            # changes by current item
+            if parent_item.flag_current_loop:
+
+                # shuffle parent contents
+                rng.shuffle(parent_item.contents)
+
+                # reset index to start
+                self.index_list[-1] = 0
+
+                # reset loop flag
+                parent_item.flag_current_loop = False
+
+            # no changes by current item
+            else:
+
+                # get contents size
+                size = len(parent_item.contents)
+
+                # at end
+                if self.index_list[-1] + 1 == size:
+
+                    # point index to parent
+                    self.index_list.pop()
+
+                    # exhuast (now pointed to) parent Node
+                    parent_item.flag_exhausted = True
+
+                # otherwise: increment
+                else:
+                    self.index_list[-1] += 1
 
         # return changed indices, program status
         return changed_indices, True
-
-    def program_loop(self):
-        '''Run the program'''
-
-        # setup program
-        self.program_setup()
-
-        # draw initial grid
-        self.state['game'].draw_setup(self.state)
-
-        # iterate through program
-        for node in self.program:
-
-            # run node
-            self.state, flag = node.run(self.state)
-
-        # program has finished: wait for quit call
-        while self.state['game'].running:
-
-            self.state['game'].event_handler()
