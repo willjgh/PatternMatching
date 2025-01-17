@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Rule():
-    def __init__(self, input_pattern, output_pattern, state, deterministic=False, symmetry="12345678", rtype="one", density=None):
+    def __init__(self, input_pattern, output_pattern, deterministic=False, symmetry="12345678", rtype="one", density=None):
 
         # store rule shape
         self.m, self.n = np.array([list(row) for row in input_pattern.split("/")]).shape
@@ -11,9 +11,6 @@ class Rule():
         self.input = input_pattern.replace("/", "")
         self.output = output_pattern.replace("/", "")
 
-        # store size of grid
-        self.i, self.j = state['grid'].shape
-
         # deterministic or random match selections
         self.deterministic = deterministic
 
@@ -21,7 +18,7 @@ class Rule():
         self.density = density
 
         # field: log-weight over grid according to density function
-        self.field = np.zeros((self.i, self.j))
+        # self.field = np.zeros((self.i, self.j))
 
         # symmetries of input allowed
         self.symmetry = symmetry
@@ -30,7 +27,7 @@ class Rule():
         self.rtype = rtype
 
     def compute_field(self, state):
-        pass
+        self.field = np.zeros((self.i, self.j))
 
     def neighbour_indices(self, i, j):
         '''
@@ -262,6 +259,9 @@ class Rule():
         return changed_indices
 
     def run(self, state):
+
+        # store size of grid
+        self.i, self.j = state['grid'].shape
         
         # find matches of the rule input in the current state
         matches = self.find_matches(state)
@@ -271,9 +271,6 @@ class Rule():
 
             # replace matches according to rule type: return changes
             changed_indices = self.replace(state, matches)
-
-            # draw new colours for the changed indices
-            #state['game'].draw(state, changed_indices)
 
             # return state, changd indices and flag
             return state, changed_indices, True
