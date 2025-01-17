@@ -21,20 +21,20 @@ colours = {
 }
 
 class Display():
-    def __init__(self, window_width=700, window_height=700, canvas_width=4, canvas_height=4, ticks=0):
+    def __init__(self, window_height=700, window_width=700, canvas_height=4, canvas_width=4, ticks=0):
 
         # initialize pygame
         pygame.init()
 
         # window: high resolution, display on screen
-        self.window_width = window_width
         self.window_height = window_height
-        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        self.window_width = window_width
+        self.window = pygame.display.set_mode((window_width, window_height))
 
         # canvas: low resolution, draw on then draw to window
-        self.canvas_width = canvas_width
         self.canvas_height = canvas_height
-        self.canvas = pygame.Surface((self.canvas_width, self.canvas_height))
+        self.canvas_width = canvas_width
+        self.canvas = pygame.Surface((canvas_width, canvas_height))
 
         # pygame settings
         pygame.display.set_caption("MarkovJunior")
@@ -47,6 +47,7 @@ class Display():
 
         # action
         self.action = False
+        self.automatic = True
     
 
     def framerate_counter(self):
@@ -78,6 +79,9 @@ class Display():
                 if event.key == pygame.K_RIGHT:
                     self.action = True
 
+                if event.key == pygame.K_SPACE:
+                    self.automatic = not self.automatic
+
         # quit
         if not self.running:
             pygame.quit()
@@ -97,15 +101,9 @@ class Display():
         
         # blit canvas to window
         self.window.blit(pygame.transform.scale(self.canvas, self.window.get_rect().size), (0, 0))
-        
-        # add framerate
-        #self.framerate_counter()
 
         # update display
         pygame.display.flip()
-
-        # check for quit
-        #self.event_handler()
 
     def draw(self, state, indices):
         '''Draw indices that were changed by rules as new colours'''
@@ -124,12 +122,6 @@ class Display():
 
         # blit canvas to window
         self.window.blit(pygame.transform.scale(self.canvas, self.window.get_rect().size), (0, 0))
-        
-        # add framerate
-        #self.framerate_counter()
 
         # update display
         pygame.display.flip()
-
-        # check for quit
-        #self.event_handler()
