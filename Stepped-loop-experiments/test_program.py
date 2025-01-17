@@ -1,75 +1,80 @@
 from mj import MarkovJunior
-from node import Node, Sequential, Markov, Limit
+from node import Node, Sequential, Markov, Limit, Random
 from rule import Rule
 from display import Display
+import numpy as np
 
-# define a program
-class Fill(MarkovJunior):
+program_competition = [
+    Limit(
+        Rule("B", "R"),
+        Rule("B", "Y"),
+        Rule("B", "U"),
+        Rule("B", "G"),
+        Rule("B", "O")
+    ),
+    Sequential(
+        Rule("RB", "RR"),
+        Rule("YB", "YY"),
+        Rule("UB", "UU"),
+        Rule("GB", "GG"),
+        Rule("OB", "OO")
+    ),
+    Sequential(
+        Rule("RY", "RR"),
+        Rule("YU", "YY"),
+        Rule("UG", "UU"),
+        Rule("GO", "GG"),
+        Rule("OR", "OO")
+    )
+]
 
-    def __init__(self, i, j):
-        super().__init__(i, j)
-
-    def program_setup(self):
-
-        # initial state
-        for i in range(self.i):
-            for j in range(self.j):
-                self.state['grid'][i, j] = 'B'
-                self.state['dict']['B'].append((i, j))
-
-        # densities
-
-        # program
-        a = [
-            Rule("B", "R", self.state),
-            Sequential(
-                Markov(Rule("RBB", "WWR", self.state)),
-                Rule("RBW", "RBO", self.state),
-                Markov(Rule("RWW", "BBR", self.state)),
-                Rule("RWO", "BBR", self.state)
-            )
-        ]
-        self.program = [
-            Limit(
-                Rule("B", "R", self.state),
-                Rule("B", "Y", self.state),
-                Rule("B", "U", self.state),
-                Rule("B", "G", self.state),
-                Rule("B", "O", self.state)
-            ),
-            Sequential(
-                Rule("RB", "RR", self.state),
-                Rule("YB", "YY", self.state),
-                Rule("UB", "UU", self.state),
-                Rule("GB", "GG", self.state),
-                Rule("OB", "OO", self.state)
-            ),
-            Sequential(
-                Rule("RY", "RR", self.state),
-                Rule("YU", "YY", self.state),
-                Rule("UG", "UU", self.state),
-                Rule("GO", "GG", self.state),
-                Rule("OR", "OO", self.state)
-            )
-        ]
+program_loop_erased = [
+        Rule("B", "R"),
+        Sequential(
+            Markov(Rule("RBB", "WWR")),
+            Rule("RBW", "RBO"),
+            Markov(Rule("RWW", "BBR")),
+            Rule("RWO", "BBR")
+        )
+    ]
 
 def main():
 
-    # size
-    i, j= 20, 20
-    winh, winw = 1000, 1000
+    # define a program
+    program = program_loop_erased
 
-    # initialize program
-    fill = Fill(i, j)
-    fill.program_setup()
+    # define grid size and window size
+    grid_height, grid_width = 50, 50
+    window_height, window_width = 500, 500
 
-    # initialize a display
-    display = Display(window_height=winh, window_width=winw, canvas_height=i, canvas_width=j)
+    # define initial state
+    initial_dict = {
+        'B': [(i, j) for i in range(grid_height) for j in range(grid_width)]
+    }
 
-    # draw intial grid
-    display.draw_setup(fill.state)
+    # initialize mj
+    mj = MarkovJunior(
+        grid_height,
+        grid_width,
+        program,
+        None,
+        initial_dict
+    )
 
+    # initialize display
+    display = Display(
+        window_height,
+        window_width,
+        grid_height,
+        grid_width
+    )
+
+    # draw intial state
+    display.draw_setup(mj.state)
+
+    # running info
     program_status = True
+    changed_indices = []
 
     # loop
     while display.running:
@@ -77,15 +82,31 @@ def main():
         # handle events
         display.event_handler()
 
-        # step program
-        if program_status: #and display.action:
-            changed_indices, program_status = fill.next()
-            display.action = False
+        # only step if program still running
+        if program_status:
+
+            # automatic
+            if display.automatic:
+
+                # step
+                changed_indices, program_status = mj.next()
+            
+            # manual
+            else:
+
+                # check action
+                if display.action:
+                
+                    # step
+                    changed_indices, program_status = mj.next()
+
+                    # reset action
+                    display.action = False
 
             # draw changes
             if changed_indices:
 
-                display.draw(fill.state, changed_indices)
+                display.draw(mj.state, changed_indices)
 
 if __name__ == "__main__":
     main()
