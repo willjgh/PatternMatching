@@ -1,6 +1,6 @@
-from mj import MarkovJunior
-from node import Node, Sequential, Markov, Limit, Random
-from rule import Rule
+from stepped_mj.mj import MarkovJunior
+from stepped_mj.node import Node, Sequential, Markov, Limit, Random
+from stepped_mj.rule import Rule
 from multi_display import MultiDisplay
 import numpy as np
 
