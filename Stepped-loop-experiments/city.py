@@ -3,7 +3,7 @@ from stepped_mj.rule import Rule
 from stepped_mj.model import model
 
 # program settings
-towers = 50
+towers = 20
 width = 15
 
 # define program
