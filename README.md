@@ -1,45 +1,29 @@
 # Pattern Matching
 
-*Heavily* inspired by [Markov Junior](https://github.com/mxgmn/MarkovJunior) I have designed several programs based around 'Pattern Matching', taking a grid of coloured squares and procedurally re-colouring squares matching a given pattern to create images or complete tasks.
+*Heavily* inspired by [Markov Junior](https://github.com/mxgmn/MarkovJunior), several programs based around 'Pattern Matching', taking a grid of coloured squares and procedurally re-colouring squares matching a given pattern to create images, animations or generate terrain.
 
-## MJ/mj.py
+## mj.py
 
-The 2 key components are the grid: coloured squares (referred to by letters) which represent the current state, and the program: a nested collection of Nodes and Rules which are applied to the grid to update the state.
+A program, a tree like structure of Nodes and Rules, is applied to a grid of coloured pixels to iteratively update via matching and replacing patterns.
 
-Rules are the fundamental building blocks, consisting of an input and output pattern and settings on how they are applied. When the Rule is run, it searches the grid for the location of all patterns matching the input pattern and selects one or more (settings) to replace by the output pattern. The simplest program consists of a single rule with input pattern 'B' and output pattern 'W' which is repeatedly applied to a grid initialised with all black squares ('B' in letters), replacing them one by one until ending with a grid of all white squares:
+<img src="/Videos/repeating-voroni-video.gif" align="right" width="250">
 
-(add example of fill)
+Rules contain an input and output pattern, and when run search the grid for matches to the input pattern before sampling one (or more) to replace with the output pattern. Additional settings control how many matches are sampled, the sampling distribution over matches, and the symmetries allowed when matching patterns.
 
-Nodes allow the building of more complex programs and consist of a list of contents: Rules or even other Nodes, which are applied in different orders according to type:
-- Sequential Nodes simply run each of their items in order
-- Markov Nodes run items in order until a change to the grid, at which point they 'reset' and run the first item (memory-less)
-- Limit Nodes run each item a specified number of times (regardless of whether they make any changes to the grid)
-- Random Nodes run items in a random order (unexpected I know)
-With the exception of the Limit type, Nodes keep running until a full pass over all contents makes no changes to the grid
+Nodes allow the construction of more complex problems. They store a list of contents, Rules or even other Nodes, and apply them according to their type:
+- Sequential Nodes loop over contents in order
+- Markov Nodes reset their loop after a change to the grid
+- Limit Nodes loop a set number of times
+- Random Nodes apply items randomly
 
-An example of program using Nodes is 'Repeating-Voroni':
+(all Nodes terminate if a full pass over all contents makes no changes to the grid)
 
-![repeating-voroni-gif](Videos/repeating-voroni-video.gif)
+The simplest program 'fill' consists of a single Rule with input 'black' and output 'white' that is repeatedly applied to turn a black grid into a white grid, one pixel at a time. Using Nodes allows programs such as a simple Voroni diagram (see above), creating red and white seeds which each expand to fill the black grid until the meet each other. Combining the different types of Nodes and Rules allows a huge variety of programs from random spreads to chess movements, flowers, terrain maps and more:
 
-Red and white seeds are spawned on a black grid, each of which exapands to fill the space until all squares fade to black and the process repeats. The program is a nesting of Sequential Nodes:
-
-Sequential Node(
-  Rule: spawn Red seed
-  Rule: spawn White seed
-  Sequential Node(
-    Rule: Red expands into Black
-    Rule: White expands into Black
-  )
-  Sequential Node(
-    Rule: Red turns to Black
-    Rule: White turns to Black
-  )
-)
-
-The combination of different types of Nodes and Rules allows a huge variety of programs from the random spreads seen above to chess movements, flowers, creatures and houses:
-
-(add example of flowers, chess and crawlers, etc)
-
+<p align="center">
+<img src="/Images/single_river.png" width="500">
+<img src="/Images/multiple_rivers.png" width="500">
+</p>
 
 ## Pathfinder
 
