@@ -1,7 +1,7 @@
-from mj import MarkovJunior
-from node import Node, Sequential, Markov, Limit, Random
-from rule import Rule
-from display import Display
+from stepped_mj.mj import MarkovJunior
+from stepped_mj.node import Node, Sequential, Markov, Limit, Random
+from stepped_mj.rule import Rule
+from stepped_mj.display import Display
 import numpy as np
 
 program_competition = [
@@ -28,29 +28,17 @@ program_competition = [
     )
 ]
 
-program_loop_erased = [
-        Rule("B", "R"),
-        Sequential(
-            Markov(Rule("RBB", "WWR")),
-            Rule("RBW", "RBO"),
-            Markov(Rule("RWW", "BBR")),
-            Rule("RWO", "BBR")
-        )
-    ]
-
 def main():
 
     # define a program
-    program = program_loop_erased
+    program = program_competition
 
     # define grid size and window size
     grid_height, grid_width = 50, 50
     window_height, window_width = 500, 500
 
     # define initial state
-    initial_dict = {
-        'B': [(i, j) for i in range(grid_height) for j in range(grid_width)]
-    }
+    initial_dict = {'B': [(i, j) for i in range(grid_height) for j in range(grid_width)]}
 
     # initialize mj
     mj = MarkovJunior(
@@ -71,6 +59,9 @@ def main():
 
     # draw intial state
     display.draw_setup(mj.state)
+
+    # manual start
+    display.automatic = False
 
     # running info
     changed_indices = []
